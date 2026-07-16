@@ -10,7 +10,23 @@
     <div class="container">
         <header>
             <h1>.env to JSON Converter</h1>
-            <p>Convert your environment variables to JSON format</p>
+            <p>Convert your environment variables to JSON format instantly</p>
+            
+            <div class="security-info">
+                <div class="security-badge">
+                    <span class="lock-icon">🔒</span>
+                    <strong>100% Safe & Private</strong>
+                    <p>This is a static site. Your environment variables are processed locally in your browser and never sent to any server.</p>
+                </div>
+                <div class="info-links">
+                    <a href="https://github.com/soolame/env-to-json-converter" target="_blank" rel="noopener noreferrer">
+                        View on GitHub
+                    </a>
+                    <a href="#" class="view-code-link" onclick="showCode(event)">
+                        View Code
+                    </a>
+                </div>
+            </div>
         </header>
 
         <div class="converter-wrapper">
@@ -53,6 +69,23 @@
         </div>
 
         <div id="notification" class="notification"></div>
+
+        <div id="codeModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>View Source Code</h3>
+                    <button class="close-btn" onclick="closeCode()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="code-tabs">
+                        <button class="code-tab active" onclick="switchTab('html')">HTML</button>
+                        <button class="code-tab" onclick="switchTab('css')">CSS</button>
+                        <button class="code-tab" onclick="switchTab('js')">JavaScript</button>
+                    </div>
+                    <pre id="codeDisplay"><code></code></pre>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
