@@ -325,87 +325,149 @@ function switchTab(tab) {
     const codeDisplay = document.getElementById('codeDisplay');
     
     tabs.forEach(t => t.classList.remove('active'));
-    event.target.classList.add('active');
+    if (event && event.target) {
+        event.target.classList.add('active');
+    } else {
+        tabs[0].classList.add('active');
+    }
+
+    const cssCode = `* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #3b82f6;
+    --primary-dark: #2563eb;
+    --secondary: #6b7280;
+    --secondary-dark: #4b5563;
+    --background: #0f172a;
+    --surface: #1e293b;
+    --surface-light: #334155;
+    --border: #475569;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --success: #10b981;
+    --success-light: #ecfdf5;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: linear-gradient(135deg, var(--background) 0%, #1a2f4d 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Additional styles for header, buttons, modals, etc. */
+/* Full CSS available in style.css file on GitHub */`;
+
+    const jsCode = `// Parse .env content to JSON object
+function parseEnvToJson(envContent) {
+    const lines = envContent.split('\\n');
+    const result = {};
+
+    for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (!trimmedLine || trimmedLine.startsWith('#')) continue;
+
+        const equalIndex = trimmedLine.indexOf('=');
+        if (equalIndex === -1) continue;
+
+        const key = trimmedLine.substring(0, equalIndex).trim();
+        let value = trimmedLine.substring(equalIndex + 1).trim();
+
+        if (!key) continue;
+
+        // Remove surrounding quotes
+        if ((value.startsWith('"') && value.endsWith('"')) ||
+            (value.startsWith("'") && value.endsWith("'"))) {
+            value = value.slice(1, -1);
+        }
+
+        result[key] = value;
+    }
+    return result;
+}
+
+// Parse JSON to .env format
+function parseJsonToEnv(jsonContent) {
+    const parsedJson = JSON.parse(jsonContent);
+    const lines = [];
+    
+    for (const [key, value] of Object.entries(parsedJson)) {
+        const stringValue = String(value);
+        const needsQuotes = /[\\s=]/.test(stringValue);
+        const quotedValue = needsQuotes ? \`"\${stringValue}"\` : stringValue;
+        lines.push(\`\${key}=\${quotedValue}\`);
+    }
+    return lines.join('\\n');
+}
+
+// Handle conversions
+function handleConvert() {
+    const envContent = envInput.value;
+    const parsedJson = parseEnvToJson(envContent);
+    const formattedJson = JSON.stringify(parsedJson, null, 4);
+    jsonOutput.value = formattedJson;
+}
+
+// Full JavaScript code available in script.js file on GitHub`;
 
     const codeMap = {
-        'html': `<!DOCTYPE html>
+        'html': `<!-- HTML structure for the Env Converter -->
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>.env to JSON Converter</title>
+    <title>Env Converter</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>.env to JSON Converter</h1>
-            <p>Convert your environment variables to JSON format instantly</p>
+            <h1>Env Converter</h1>
+            <p>Seamlessly convert between .env and JSON formats</p>
+            
+            <div class="mode-tabs">
+                <button class="mode-tab active" onclick="switchMode('env-to-json')">
+                    .env → JSON
+                </button>
+                <button class="mode-tab" onclick="switchMode('json-to-env')">
+                    JSON → .env
+                </button>
+            </div>
             
             <div class="security-info">
                 <div class="security-badge">
                     <span class="lock-icon">🔒</span>
                     <strong>100% Safe & Private</strong>
-                    <p>This is a static site. Your environment variables are processed locally in your browser and never sent to any server.</p>
+                    <p>Static site with local processing - your data never leaves your browser</p>
                 </div>
                 <div class="info-links">
-                    <a href="https://github.com/soolame/env-to-json-converter" target="_blank" rel="noopener noreferrer">
-                        View on GitHub
-                    </a>
-                    <a href="#" class="view-code-link" onclick="showCode(event)">
-                        View Code
-                    </a>
+                    <a href="https://github.com/soolame/env-to-json-converter" target="_blank">View on GitHub</a>
+                    <a href="#" onclick="showCode(event)">View Code</a>
                 </div>
             </div>
         </header>
 
-        <div class="converter-wrapper">
-            <div class="input-section">
-                <div class="section-header">
-                    <h2>Input</h2>
-                    <span class="hint">.env file</span>
-                </div>
-                <textarea
-                    id="envInput"
-                    placeholder="# Paste your .env file here&#10;PORT=3000&#10;DATABASE_URL=postgres://...&#10;API_KEY=secret_key"
-                    spellcheck="false"
-                ></textarea>
-            </div>
-
-            <div class="output-section">
-                <div class="section-header">
-                    <h2>Output</h2>
-                    <span class="hint">JSON object</span>
-                </div>
-                <textarea
-                    id="jsonOutput"
-                    placeholder="Click Convert to see the JSON output"
-                    readonly
-                    spellcheck="false"
-                ></textarea>
-            </div>
+        <!-- Conversion modes with textarea inputs and buttons -->
+        <div id="envToJsonMode" class="converter-mode active">
+            <!-- .env to JSON converter UI -->
         </div>
 
-        <div class="button-group">
-            <button id="convertBtn" class="btn btn-primary">
-                <span>Convert</span>
-            </button>
-            <button id="copyBtn" class="btn btn-secondary" disabled>
-                <span>Copy to Clipboard</span>
-            </button>
-            <button id="clearBtn" class="btn btn-tertiary">
-                <span>Clear</span>
-            </button>
+        <div id="jsonToEnvMode" class="converter-mode">
+            <!-- JSON to .env converter UI -->
         </div>
-
-        <div id="notification" class="notification"></div>
     </div>
-
+    
     <script src="script.js"><\/script>
 </body>
 </html>`,
-        'css': `(View the full CSS in the style.css file on GitHub)`,
-        'js': `(View the full JavaScript in the script.js file on GitHub)`
+        'css': cssCode,
+        'js': jsCode
     };
 
     codeDisplay.textContent = codeMap[tab];
