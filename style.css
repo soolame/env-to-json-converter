@@ -58,6 +58,36 @@ header p {
     margin-bottom: 24px;
 }
 
+.mode-tabs {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.mode-tab {
+    padding: 10px 24px;
+    background: var(--surface-light);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mode-tab:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.mode-tab.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
 .security-info {
     margin-top: 32px;
     display: flex;
@@ -119,6 +149,15 @@ header p {
     background: var(--primary);
     color: white;
     transform: translateY(-2px);
+}
+
+.converter-mode {
+    display: none;
+    animation: slideUp 0.3s ease-out both;
+}
+
+.converter-mode.active {
+    display: block;
 }
 
 .converter-wrapper {

@@ -1,8 +1,17 @@
+// Mode 1: .env to JSON
 const envInput = document.getElementById('envInput');
 const jsonOutput = document.getElementById('jsonOutput');
 const convertBtn = document.getElementById('convertBtn');
 const copyBtn = document.getElementById('copyBtn');
 const clearBtn = document.getElementById('clearBtn');
+
+// Mode 2: JSON to .env
+const jsonInput = document.getElementById('jsonInput');
+const envOutput = document.getElementById('envOutput');
+const convertBtn2 = document.getElementById('convertBtn2');
+const copyBtn2 = document.getElementById('copyBtn2');
+const clearBtn2 = document.getElementById('clearBtn2');
+
 const notification = document.getElementById('notification');
 
 /**
@@ -68,6 +77,38 @@ function formatJson(obj) {
 }
 
 /**
+ * Parse JSON string to a .env format string
+ * @param {string} jsonContent - JSON string content
+ * @returns {string} .env formatted string
+ */
+function parseJsonToEnv(jsonContent) {
+    let parsedJson;
+    try {
+        parsedJson = JSON.parse(jsonContent);
+    } catch (error) {
+        throw new Error('Invalid JSON: ' + error.message);
+    }
+
+    if (typeof parsedJson !== 'object' || parsedJson === null || Array.isArray(parsedJson)) {
+        throw new Error('JSON must be an object, not an array or primitive');
+    }
+
+    const lines = [];
+    for (const [key, value] of Object.entries(parsedJson)) {
+        // Skip non-string values
+        const stringValue = String(value);
+        
+        // Quote values that contain spaces or special characters
+        const needsQuotes = /[\s=]/.test(stringValue) || stringValue.includes('"');
+        const quotedValue = needsQuotes && !stringValue.includes('"') ? `"${stringValue}"` : stringValue;
+        
+        lines.push(`${key}=${quotedValue}`);
+    }
+
+    return lines.join('\n');
+}
+
+/**
  * Handle the convert button click
  */
 function handleConvert() {
@@ -126,6 +167,62 @@ function handleClear() {
 }
 
 /**
+ * Handle the convert button click for JSON to .env
+ */
+function handleConvert2() {
+    try {
+        const jsonContent = jsonInput.value;
+
+        if (!jsonContent.trim()) {
+            showNotification('Please enter JSON content', 'error');
+            envOutput.value = '';
+            copyBtn2.disabled = true;
+            return;
+        }
+
+        const envText = parseJsonToEnv(jsonContent);
+        envOutput.value = envText;
+        copyBtn2.disabled = false;
+        showNotification('✓ Conversion successful');
+    } catch (error) {
+        showNotification('Error: ' + error.message, 'error');
+        console.error('Conversion error:', error);
+    }
+}
+
+/**
+ * Handle the copy button click for JSON to .env
+ */
+function handleCopy2() {
+    const envText = envOutput.value;
+
+    if (!envText.trim()) {
+        showNotification('Nothing to copy', 'error');
+        return;
+    }
+
+    navigator.clipboard
+        .writeText(envText)
+        .then(() => {
+            showNotification('✓ Copied to clipboard');
+            copyBtn2.blur();
+        })
+        .catch(() => {
+            showNotification('Failed to copy', 'error');
+        });
+}
+
+/**
+ * Handle the clear button click for JSON to .env
+ */
+function handleClear2() {
+    jsonInput.value = '';
+    envOutput.value = '';
+    copyBtn2.disabled = true;
+    jsonInput.focus();
+}
+
+/**
  * Show a temporary notification
  * @param {string} message - Message to display
  * @param {string} type - Notification type ('success' or 'error')
@@ -155,14 +252,52 @@ function handleInputKeydown(e) {
     }
 }
 
-// Event listeners
+/**
+ * Handle Enter key in JSON input textarea for quick conversion
+ */
+function handleInputKeydown2(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        handleConvert2();
+    }
+}
+
+/**
+ * Switch between conversion modes
+ * @param {string} mode - 'env-to-json' or 'json-to-env'
+ */
+function switchMode(mode) {
+    const envToJsonMode = document.getElementById('envToJsonMode');
+    const jsonToEnvMode = document.getElementById('jsonToEnvMode');
+    const tabs = document.querySelectorAll('.mode-tab');
+
+    tabs.forEach(tab => tab.classList.remove('active'));
+    
+    if (mode === 'env-to-json') {
+        envToJsonMode.classList.add('active');
+        jsonToEnvMode.classList.remove('active');
+        tabs[0].classList.add('active');
+    } else {
+        envToJsonMode.classList.remove('active');
+        jsonToEnvMode.classList.add('active');
+        tabs[1].classList.add('active');
+    }
+}
+
+// Event listeners for Mode 1 (.env to JSON)
 convertBtn.addEventListener('click', handleConvert);
 copyBtn.addEventListener('click', handleCopy);
 clearBtn.addEventListener('click', handleClear);
 envInput.addEventListener('keydown', handleInputKeydown);
 
+// Event listeners for Mode 2 (JSON to .env)
+convertBtn2.addEventListener('click', handleConvert2);
+copyBtn2.addEventListener('click', handleCopy2);
+clearBtn2.addEventListener('click', handleClear2);
+jsonInput.addEventListener('keydown', handleInputKeydown2);
+
 // Initialize
 copyBtn.disabled = true;
+copyBtn2.disabled = true;
 
 /**
  * Show the code modal with source code
@@ -190,87 +325,149 @@ function switchTab(tab) {
     const codeDisplay = document.getElementById('codeDisplay');
     
     tabs.forEach(t => t.classList.remove('active'));
-    event.target.classList.add('active');
+    if (event && event.target) {
+        event.target.classList.add('active');
+    } else {
+        tabs[0].classList.add('active');
+    }
+
+    const cssCode = `* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #3b82f6;
+    --primary-dark: #2563eb;
+    --secondary: #6b7280;
+    --secondary-dark: #4b5563;
+    --background: #0f172a;
+    --surface: #1e293b;
+    --surface-light: #334155;
+    --border: #475569;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --success: #10b981;
+    --success-light: #ecfdf5;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: linear-gradient(135deg, var(--background) 0%, #1a2f4d 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Additional styles for header, buttons, modals, etc. */
+/* Full CSS available in style.css file on GitHub */`;
+
+    const jsCode = `// Parse .env content to JSON object
+function parseEnvToJson(envContent) {
+    const lines = envContent.split('\\n');
+    const result = {};
+
+    for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (!trimmedLine || trimmedLine.startsWith('#')) continue;
+
+        const equalIndex = trimmedLine.indexOf('=');
+        if (equalIndex === -1) continue;
+
+        const key = trimmedLine.substring(0, equalIndex).trim();
+        let value = trimmedLine.substring(equalIndex + 1).trim();
+
+        if (!key) continue;
+
+        // Remove surrounding quotes
+        if ((value.startsWith('"') && value.endsWith('"')) ||
+            (value.startsWith("'") && value.endsWith("'"))) {
+            value = value.slice(1, -1);
+        }
+
+        result[key] = value;
+    }
+    return result;
+}
+
+// Parse JSON to .env format
+function parseJsonToEnv(jsonContent) {
+    const parsedJson = JSON.parse(jsonContent);
+    const lines = [];
+    
+    for (const [key, value] of Object.entries(parsedJson)) {
+        const stringValue = String(value);
+        const needsQuotes = /[\\s=]/.test(stringValue);
+        const quotedValue = needsQuotes ? \`"\${stringValue}"\` : stringValue;
+        lines.push(\`\${key}=\${quotedValue}\`);
+    }
+    return lines.join('\\n');
+}
+
+// Handle conversions
+function handleConvert() {
+    const envContent = envInput.value;
+    const parsedJson = parseEnvToJson(envContent);
+    const formattedJson = JSON.stringify(parsedJson, null, 4);
+    jsonOutput.value = formattedJson;
+}
+
+// Full JavaScript code available in script.js file on GitHub`;
 
     const codeMap = {
-        'html': `<!DOCTYPE html>
+        'html': `<!-- HTML structure for the Env Converter -->
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>.env to JSON Converter</title>
+    <title>Env Converter</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>.env to JSON Converter</h1>
-            <p>Convert your environment variables to JSON format instantly</p>
+            <h1>Env Converter</h1>
+            <p>Seamlessly convert between .env and JSON formats</p>
+            
+            <div class="mode-tabs">
+                <button class="mode-tab active" onclick="switchMode('env-to-json')">
+                    .env → JSON
+                </button>
+                <button class="mode-tab" onclick="switchMode('json-to-env')">
+                    JSON → .env
+                </button>
+            </div>
             
             <div class="security-info">
                 <div class="security-badge">
                     <span class="lock-icon">🔒</span>
                     <strong>100% Safe & Private</strong>
-                    <p>This is a static site. Your environment variables are processed locally in your browser and never sent to any server.</p>
+                    <p>Static site with local processing - your data never leaves your browser</p>
                 </div>
                 <div class="info-links">
-                    <a href="https://github.com/soolame/env-to-json-converter" target="_blank" rel="noopener noreferrer">
-                        View on GitHub
-                    </a>
-                    <a href="#" class="view-code-link" onclick="showCode(event)">
-                        View Code
-                    </a>
+                    <a href="https://github.com/soolame/env-to-json-converter" target="_blank">View on GitHub</a>
+                    <a href="#" onclick="showCode(event)">View Code</a>
                 </div>
             </div>
         </header>
 
-        <div class="converter-wrapper">
-            <div class="input-section">
-                <div class="section-header">
-                    <h2>Input</h2>
-                    <span class="hint">.env file</span>
-                </div>
-                <textarea
-                    id="envInput"
-                    placeholder="# Paste your .env file here&#10;PORT=3000&#10;DATABASE_URL=postgres://...&#10;API_KEY=secret_key"
-                    spellcheck="false"
-                ></textarea>
-            </div>
-
-            <div class="output-section">
-                <div class="section-header">
-                    <h2>Output</h2>
-                    <span class="hint">JSON object</span>
-                </div>
-                <textarea
-                    id="jsonOutput"
-                    placeholder="Click Convert to see the JSON output"
-                    readonly
-                    spellcheck="false"
-                ></textarea>
-            </div>
+        <!-- Conversion modes with textarea inputs and buttons -->
+        <div id="envToJsonMode" class="converter-mode active">
+            <!-- .env to JSON converter UI -->
         </div>
 
-        <div class="button-group">
-            <button id="convertBtn" class="btn btn-primary">
-                <span>Convert</span>
-            </button>
-            <button id="copyBtn" class="btn btn-secondary" disabled>
-                <span>Copy to Clipboard</span>
-            </button>
-            <button id="clearBtn" class="btn btn-tertiary">
-                <span>Clear</span>
-            </button>
+        <div id="jsonToEnvMode" class="converter-mode">
+            <!-- JSON to .env converter UI -->
         </div>
-
-        <div id="notification" class="notification"></div>
     </div>
-
+    
     <script src="script.js"><\/script>
 </body>
 </html>`,
-        'css': `(View the full CSS in the style.css file on GitHub)`,
-        'js': `(View the full JavaScript in the script.js file on GitHub)`
+        'css': cssCode,
+        'js': jsCode
     };
 
     codeDisplay.textContent = codeMap[tab];

@@ -9,8 +9,17 @@
 <body>
     <div class="container">
         <header>
-            <h1>.env to JSON Converter</h1>
-            <p>Convert your environment variables to JSON format instantly</p>
+            <h1>Env Converter</h1>
+            <p>Seamlessly convert between .env and JSON formats</p>
+            
+            <div class="mode-tabs">
+                <button class="mode-tab active" onclick="switchMode('env-to-json')">
+                    .env → JSON
+                </button>
+                <button class="mode-tab" onclick="switchMode('json-to-env')">
+                    JSON → .env
+                </button>
+            </div>
             
             <div class="security-info">
                 <div class="security-badge">
@@ -29,43 +38,88 @@
             </div>
         </header>
 
-        <div class="converter-wrapper">
-            <div class="input-section">
-                <div class="section-header">
-                    <h2>Input</h2>
-                    <span class="hint">.env file</span>
+        <!-- .env to JSON Mode -->
+        <div id="envToJsonMode" class="converter-mode active">
+            <div class="converter-wrapper">
+                <div class="input-section">
+                    <div class="section-header">
+                        <h2>Input</h2>
+                        <span class="hint">.env file</span>
+                    </div>
+                    <textarea
+                        id="envInput"
+                        placeholder="# Paste your .env file here&#10;PORT=3000&#10;DATABASE_URL=postgres://...&#10;API_KEY=secret_key"
+                        spellcheck="false"
+                    ></textarea>
                 </div>
-                <textarea
-                    id="envInput"
-                    placeholder="# Paste your .env file here&#10;PORT=3000&#10;DATABASE_URL=postgres://...&#10;API_KEY=secret_key"
-                    spellcheck="false"
-                ></textarea>
+
+                <div class="output-section">
+                    <div class="section-header">
+                        <h2>Output</h2>
+                        <span class="hint">JSON object</span>
+                    </div>
+                    <textarea
+                        id="jsonOutput"
+                        placeholder="Click Convert to see the JSON output"
+                        readonly
+                        spellcheck="false"
+                    ></textarea>
+                </div>
             </div>
 
-            <div class="output-section">
-                <div class="section-header">
-                    <h2>Output</h2>
-                    <span class="hint">JSON object</span>
-                </div>
-                <textarea
-                    id="jsonOutput"
-                    placeholder="Click Convert to see the JSON output"
-                    readonly
-                    spellcheck="false"
-                ></textarea>
+            <div class="button-group">
+                <button id="convertBtn" class="btn btn-primary">
+                    <span>Convert</span>
+                </button>
+                <button id="copyBtn" class="btn btn-secondary" disabled>
+                    <span>Copy to Clipboard</span>
+                </button>
+                <button id="clearBtn" class="btn btn-tertiary">
+                    <span>Clear</span>
+                </button>
             </div>
         </div>
 
-        <div class="button-group">
-            <button id="convertBtn" class="btn btn-primary">
-                <span>Convert</span>
-            </button>
-            <button id="copyBtn" class="btn btn-secondary" disabled>
-                <span>Copy to Clipboard</span>
-            </button>
-            <button id="clearBtn" class="btn btn-tertiary">
-                <span>Clear</span>
-            </button>
+        <!-- JSON to .env Mode -->
+        <div id="jsonToEnvMode" class="converter-mode">
+            <div class="converter-wrapper">
+                <div class="input-section">
+                    <div class="section-header">
+                        <h2>Input</h2>
+                        <span class="hint">JSON object</span>
+                    </div>
+                    <textarea
+                        id="jsonInput"
+                        placeholder='{"PORT":"3000","DATABASE_URL":"postgres://...","API_KEY":"secret_key"}'
+                        spellcheck="false"
+                    ></textarea>
+                </div>
+
+                <div class="output-section">
+                    <div class="section-header">
+                        <h2>Output</h2>
+                        <span class="hint">.env file</span>
+                    </div>
+                    <textarea
+                        id="envOutput"
+                        placeholder="Click Convert to see the .env output"
+                        readonly
+                        spellcheck="false"
+                    ></textarea>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button id="convertBtn2" class="btn btn-primary">
+                    <span>Convert</span>
+                </button>
+                <button id="copyBtn2" class="btn btn-secondary" disabled>
+                    <span>Copy to Clipboard</span>
+                </button>
+                <button id="clearBtn2" class="btn btn-tertiary">
+                    <span>Clear</span>
+                </button>
+            </div>
         </div>
 
         <div id="notification" class="notification"></div>
