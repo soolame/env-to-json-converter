@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>.env to JSON Converter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>.env to JSON Converter</h1>
+            <p>Convert your environment variables to JSON format</p>
+        </header>
+
+        <div class="converter-wrapper">
+            <div class="input-section">
+                <div class="section-header">
+                    <h2>Input</h2>
+                    <span class="hint">.env file</span>
+                </div>
+                <textarea
+                    id="envInput"
+                    placeholder="# Paste your .env file here&#10;PORT=3000&#10;DATABASE_URL=postgres://...&#10;API_KEY=secret_key"
+                    spellcheck="false"
+                ></textarea>
+            </div>
+
+            <div class="output-section">
+                <div class="section-header">
+                    <h2>Output</h2>
+                    <span class="hint">JSON object</span>
+                </div>
+                <textarea
+                    id="jsonOutput"
+                    placeholder="Click Convert to see the JSON output"
+                    readonly
+                    spellcheck="false"
+                ></textarea>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="convertBtn" class="btn btn-primary">
+                <span>Convert</span>
+            </button>
+            <button id="copyBtn" class="btn btn-secondary" disabled>
+                <span>Copy to Clipboard</span>
+            </button>
+            <button id="clearBtn" class="btn btn-tertiary">
+                <span>Clear</span>
+            </button>
+        </div>
+
+        <div id="notification" class="notification"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
