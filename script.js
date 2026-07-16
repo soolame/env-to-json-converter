@@ -1,8 +1,17 @@
+// Mode 1: .env to JSON
 const envInput = document.getElementById('envInput');
 const jsonOutput = document.getElementById('jsonOutput');
 const convertBtn = document.getElementById('convertBtn');
 const copyBtn = document.getElementById('copyBtn');
 const clearBtn = document.getElementById('clearBtn');
+
+// Mode 2: JSON to .env
+const jsonInput = document.getElementById('jsonInput');
+const envOutput = document.getElementById('envOutput');
+const convertBtn2 = document.getElementById('convertBtn2');
+const copyBtn2 = document.getElementById('copyBtn2');
+const clearBtn2 = document.getElementById('clearBtn2');
+
 const notification = document.getElementById('notification');
 
 /**
@@ -68,6 +77,38 @@ function formatJson(obj) {
 }
 
 /**
+ * Parse JSON string to a .env format string
+ * @param {string} jsonContent - JSON string content
+ * @returns {string} .env formatted string
+ */
+function parseJsonToEnv(jsonContent) {
+    let parsedJson;
+    try {
+        parsedJson = JSON.parse(jsonContent);
+    } catch (error) {
+        throw new Error('Invalid JSON: ' + error.message);
+    }
+
+    if (typeof parsedJson !== 'object' || parsedJson === null || Array.isArray(parsedJson)) {
+        throw new Error('JSON must be an object, not an array or primitive');
+    }
+
+    const lines = [];
+    for (const [key, value] of Object.entries(parsedJson)) {
+        // Skip non-string values
+        const stringValue = String(value);
+        
+        // Quote values that contain spaces or special characters
+        const needsQuotes = /[\s=]/.test(stringValue) || stringValue.includes('"');
+        const quotedValue = needsQuotes && !stringValue.includes('"') ? `"${stringValue}"` : stringValue;
+        
+        lines.push(`${key}=${quotedValue}`);
+    }
+
+    return lines.join('\n');
+}
+
+/**
  * Handle the convert button click
  */
 function handleConvert() {
@@ -126,6 +167,62 @@ function handleClear() {
 }
 
 /**
+ * Handle the convert button click for JSON to .env
+ */
+function handleConvert2() {
+    try {
+        const jsonContent = jsonInput.value;
+
+        if (!jsonContent.trim()) {
+            showNotification('Please enter JSON content', 'error');
+            envOutput.value = '';
+            copyBtn2.disabled = true;
+            return;
+        }
+
+        const envText = parseJsonToEnv(jsonContent);
+        envOutput.value = envText;
+        copyBtn2.disabled = false;
+        showNotification('✓ Conversion successful');
+    } catch (error) {
+        showNotification('Error: ' + error.message, 'error');
+        console.error('Conversion error:', error);
+    }
+}
+
+/**
+ * Handle the copy button click for JSON to .env
+ */
+function handleCopy2() {
+    const envText = envOutput.value;
+
+    if (!envText.trim()) {
+        showNotification('Nothing to copy', 'error');
+        return;
+    }
+
+    navigator.clipboard
+        .writeText(envText)
+        .then(() => {
+            showNotification('✓ Copied to clipboard');
+            copyBtn2.blur();
+        })
+        .catch(() => {
+            showNotification('Failed to copy', 'error');
+        });
+}
+
+/**
+ * Handle the clear button click for JSON to .env
+ */
+function handleClear2() {
+    jsonInput.value = '';
+    envOutput.value = '';
+    copyBtn2.disabled = true;
+    jsonInput.focus();
+}
+
+/**
  * Show a temporary notification
  * @param {string} message - Message to display
  * @param {string} type - Notification type ('success' or 'error')
@@ -155,14 +252,52 @@ function handleInputKeydown(e) {
     }
 }
 
-// Event listeners
+/**
+ * Handle Enter key in JSON input textarea for quick conversion
+ */
+function handleInputKeydown2(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        handleConvert2();
+    }
+}
+
+/**
+ * Switch between conversion modes
+ * @param {string} mode - 'env-to-json' or 'json-to-env'
+ */
+function switchMode(mode) {
+    const envToJsonMode = document.getElementById('envToJsonMode');
+    const jsonToEnvMode = document.getElementById('jsonToEnvMode');
+    const tabs = document.querySelectorAll('.mode-tab');
+
+    tabs.forEach(tab => tab.classList.remove('active'));
+    
+    if (mode === 'env-to-json') {
+        envToJsonMode.classList.add('active');
+        jsonToEnvMode.classList.remove('active');
+        tabs[0].classList.add('active');
+    } else {
+        envToJsonMode.classList.remove('active');
+        jsonToEnvMode.classList.add('active');
+        tabs[1].classList.add('active');
+    }
+}
+
+// Event listeners for Mode 1 (.env to JSON)
 convertBtn.addEventListener('click', handleConvert);
 copyBtn.addEventListener('click', handleCopy);
 clearBtn.addEventListener('click', handleClear);
 envInput.addEventListener('keydown', handleInputKeydown);
 
+// Event listeners for Mode 2 (JSON to .env)
+convertBtn2.addEventListener('click', handleConvert2);
+copyBtn2.addEventListener('click', handleCopy2);
+clearBtn2.addEventListener('click', handleClear2);
+jsonInput.addEventListener('keydown', handleInputKeydown2);
+
 // Initialize
 copyBtn.disabled = true;
+copyBtn2.disabled = true;
 
 /**
  * Show the code modal with source code
