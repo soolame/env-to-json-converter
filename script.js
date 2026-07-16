@@ -163,3 +163,123 @@ envInput.addEventListener('keydown', handleInputKeydown);
 
 // Initialize
 copyBtn.disabled = true;
+
+/**
+ * Show the code modal with source code
+ */
+function showCode(event) {
+    event.preventDefault();
+    const modal = document.getElementById('codeModal');
+    modal.classList.add('show');
+    switchTab('html');
+}
+
+/**
+ * Close the code modal
+ */
+function closeCode() {
+    const modal = document.getElementById('codeModal');
+    modal.classList.remove('show');
+}
+
+/**
+ * Switch between code tabs
+ */
+function switchTab(tab) {
+    const tabs = document.querySelectorAll('.code-tab');
+    const codeDisplay = document.getElementById('codeDisplay');
+    
+    tabs.forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+
+    const codeMap = {
+        'html': `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>.env to JSON Converter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>.env to JSON Converter</h1>
+            <p>Convert your environment variables to JSON format instantly</p>
+            
+            <div class="security-info">
+                <div class="security-badge">
+                    <span class="lock-icon">🔒</span>
+                    <strong>100% Safe & Private</strong>
+                    <p>This is a static site. Your environment variables are processed locally in your browser and never sent to any server.</p>
+                </div>
+                <div class="info-links">
+                    <a href="https://github.com/soolame/env-to-json-converter" target="_blank" rel="noopener noreferrer">
+                        View on GitHub
+                    </a>
+                    <a href="#" class="view-code-link" onclick="showCode(event)">
+                        View Code
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <div class="converter-wrapper">
+            <div class="input-section">
+                <div class="section-header">
+                    <h2>Input</h2>
+                    <span class="hint">.env file</span>
+                </div>
+                <textarea
+                    id="envInput"
+                    placeholder="# Paste your .env file here&#10;PORT=3000&#10;DATABASE_URL=postgres://...&#10;API_KEY=secret_key"
+                    spellcheck="false"
+                ></textarea>
+            </div>
+
+            <div class="output-section">
+                <div class="section-header">
+                    <h2>Output</h2>
+                    <span class="hint">JSON object</span>
+                </div>
+                <textarea
+                    id="jsonOutput"
+                    placeholder="Click Convert to see the JSON output"
+                    readonly
+                    spellcheck="false"
+                ></textarea>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="convertBtn" class="btn btn-primary">
+                <span>Convert</span>
+            </button>
+            <button id="copyBtn" class="btn btn-secondary" disabled>
+                <span>Copy to Clipboard</span>
+            </button>
+            <button id="clearBtn" class="btn btn-tertiary">
+                <span>Clear</span>
+            </button>
+        </div>
+
+        <div id="notification" class="notification"></div>
+    </div>
+
+    <script src="script.js"><\/script>
+</body>
+</html>`,
+        'css': `(View the full CSS in the style.css file on GitHub)`,
+        'js': `(View the full JavaScript in the script.js file on GitHub)`
+    };
+
+    codeDisplay.textContent = codeMap[tab];
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('codeModal');
+    if (event.target === modal) {
+        closeCode();
+    }
+});
